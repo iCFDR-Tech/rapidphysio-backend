@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 
 // === Middleware ===
 const allowedOrigins = [
-    "https://rapidphysio.kashiseva108.com/",
+    "https://rapidphysio.kashiseva108.com",
     "http://localhost:3000"
 ];
 
