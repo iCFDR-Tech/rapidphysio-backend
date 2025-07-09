@@ -37,11 +37,13 @@ mongoose.connect(process.env.MONGO_URI, {
 // === API Routes ===
 const bookingRoutes = require('./routes/bookings');
 const testimonialRoutes = require('./routes/testimonials');
-const paymentRoutes = require('./routes/payment'); // 🔁 Your Razorpay payment logic (create & verify)
+const paymentRoutes = require('./routes/payment'); 
+const adminRoutes = require('./routes/admin');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/testimonials', testimonialRoutes);
-app.use('/api/payment', paymentRoutes); // ✅ Add this line for Razorpay integration
+app.use('/api/payment', paymentRoutes); 
+app.use('/api/admin',adminRoutes);
 
 // === Root Route ===
 app.get('/', (req, res) => {

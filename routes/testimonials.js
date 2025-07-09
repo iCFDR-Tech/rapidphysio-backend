@@ -5,13 +5,14 @@ const Testimonial = require('../models/Testimonial');
 // POST a testimonial
 router.post('/', async (req, res) => {
     try {
-        const { name, feedback, rating } = req.body;
+        const { name, email, feedback, rating } = req.body;
+        console.log(req.body);
 
-        if (!name || !feedback || !rating) {
+        if (!name || !email || !feedback || !rating) {
             return res.status(400).json({ error: 'All fields required' });
         }
 
-        const testimonial = new Testimonial({ name, feedback, rating });
+        const testimonial = new Testimonial({ name, email, feedback, rating });
         await testimonial.save();
         res.status(201).json(testimonial);
     } catch (err) {

@@ -31,7 +31,8 @@ router.post("/create-order", async (req, res) => {
                 date: bookingData.date || '',
                 time: bookingData.time || '',
                 city: bookingData.city || '',
-                therapyType: bookingData.therapyType || ''
+                therapyType: bookingData.therapyType || '',
+                therapyMode: bookingData.therapyMode || ''
             },
         });
 

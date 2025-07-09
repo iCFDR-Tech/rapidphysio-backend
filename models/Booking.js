@@ -8,6 +8,7 @@ const bookingSchema = new mongoose.Schema({
     time: { type: String, required: true },
     city: { type: String, required: true },
     therapyType: { type: String, required: true },
+    therapyMode: { type: String, required: true },
     paymentId: { type: String, required: true },  // Ensure payment is completed
     status: {
         type: String,
