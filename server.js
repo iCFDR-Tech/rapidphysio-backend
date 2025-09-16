@@ -1,6 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
@@ -10,7 +10,8 @@ const port = process.env.PORT || 5000;
 
 // === Middleware ===
 const allowedOrigins = [
-    "https://rapidphysio.kashiseva108.com",
+    "https://www.rapidphysio.in",
+    "https://rapidphysio.in",
     "http://localhost:3000"
 ];
 
@@ -31,24 +32,18 @@ mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
-    .then(() => console.log('✅ MongoDB Connected'))
+    .then(() => console.log(`✅ MongoDB Connected to database: ${mongoose.connection.name}`))
     .catch((err) => console.error('❌ MongoDB Error:', err));
 
-// === API Routes ===
-const bookingRoutes = require('./routes/bookings');
-const testimonialRoutes = require('./routes/testimonials');
-const paymentRoutes = require('./routes/payment'); 
-const adminRoutes = require('./routes/admin');
 
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/testimonials', testimonialRoutes);
-app.use('/api/payment', paymentRoutes); 
-app.use('/api/admin',adminRoutes);
+// === Routes ===
+// app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/testimonials', require('./routes/testimonials'));
+app.use('/api/payment', require('./routes/payment'));
+app.use('/api/admin', require('./routes/admin'));
 
-// === Root Route ===
 app.get('/', (req, res) => {
     res.send('Rapid Physio Backend is running 🚀');
 });
 
-// === Start Server ===
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));

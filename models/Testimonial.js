@@ -8,4 +8,4 @@ const testimonialSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Testimonial', testimonialSchema);
+module.exports = mongoose.connection.models.Testimonial || mongoose.connection.model('Testimonial', testimonialSchema);

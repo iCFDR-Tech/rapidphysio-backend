@@ -9,11 +9,12 @@ const bookingSchema = new mongoose.Schema({
     city: { type: String, required: true },
     therapyType: { type: String, required: true },
     therapyMode: { type: String, required: true },
-    paymentId: { type: String, required: true },  // Ensure payment is completed
+    paymentId: { type: String, required: true },
+    bookingRef: { type: String, unique: true },
     status: {
         type: String,
         enum: ['Pending', 'Confirmed', 'Cancelled'],
-        default: 'Confirmed', // Since it's saved after successful payment
+        default: 'Confirmed',
     },
 }, { timestamps: true });
 
