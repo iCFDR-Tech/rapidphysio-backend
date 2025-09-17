@@ -3,7 +3,7 @@ const router = express.Router();
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const Booking = require("../models/Booking");
-const Counter = require("../models/Counter"); 
+const Counter = require("../models/Counter");
 const sendBookingTicketEmail = require("../utils/mailer");
 require("dotenv").config();
 
@@ -22,12 +22,12 @@ router.get("/razorpay-key", (req, res) => {
 router.post("/create-order", async (req, res) => {
   const { amount, bookingData } = req.body;
   if (!amount || !bookingData) {
-    return res.status(400).json({ message: "Missing amount or bookingData" });
+    return res.status(400).json({ message: "Missing amount or bookingData", booking: null });
   }
 
   try {
     const order = await razorpay.orders.create({
-      amount: amount * 100, // in paise
+      amount: amount * 100, // ✅ always convert ₹ to paise here
       currency: "INR",
       receipt: `receipt_order_${Date.now()}`,
       notes: bookingData,
@@ -36,21 +36,18 @@ router.post("/create-order", async (req, res) => {
     res.status(201).json(order);
   } catch (err) {
     console.error("❌ Razorpay order creation failed:", err);
-    res.status(500).json({ message: "Order creation failed", error: err.message });
+    res.status(500).json({ message: "Order creation failed", error: err.message, booking: null });
   }
 });
 
-// ------------------- 3️⃣ Generate Professional Booking Reference -------------------
+// ------------------- 3️⃣ Generate Booking Reference -------------------
 async function generateBookingRef() {
   const year = new Date().getFullYear();
-
-  // Increment counter in a separate collection
   const counter = await Counter.findOneAndUpdate(
     { name: "booking" },
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
-
   const seqNumber = String(counter.seq).padStart(4, "0");
   return `RAPID-${year}-${seqNumber}`;
 }
@@ -60,7 +57,7 @@ router.post("/verify-payment", async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingData } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !bookingData) {
-    return res.status(400).json({ message: "Missing data for verification" });
+    return res.status(400).json({ message: "Missing data for verification", booking: null });
   }
 
   try {
@@ -71,7 +68,8 @@ router.post("/verify-payment", async (req, res) => {
       .digest("hex");
 
     if (generated_signature !== razorpay_signature) {
-      return res.status(400).json({ message: "Invalid payment signature" });
+      console.error("❌ Invalid payment signature");
+      return res.status(400).json({ message: "Invalid payment signature", booking: null });
     }
 
     // ✅ Generate booking reference
@@ -84,21 +82,29 @@ router.post("/verify-payment", async (req, res) => {
       bookingRef,
       status: "Confirmed",
     });
+
     const savedBooking = await booking.save();
+    console.log("✅ Booking saved:", savedBooking._id);
 
-
-    // ✅ Send PDF ticket via email
-    await sendBookingTicketEmail(savedBooking);
+    // ✅ Send email (non-blocking)
+    try {
+      await sendBookingTicketEmail(savedBooking);
+      console.log("📧 Ticket email sent to:", savedBooking.email);
+    } catch (emailErr) {
+      console.error("❌ Email sending failed:", emailErr.message);
+    }
 
     res.status(201).json({
       message: "Payment verified & booking saved",
       booking: savedBooking,
     });
+
   } catch (err) {
     console.error("❌ Error verifying payment:", err);
     res.status(500).json({
       message: "Payment verification failed",
       error: err.message,
+      booking: null,
     });
   }
 });
